@@ -5,8 +5,6 @@ from selenium import webdriver
 import selenium.common.exceptions
 from selenium.webdriver.common.keys import Keys
 
-import Instagram_Bot_Application
-
 
 class InstaBot:
     def __init__(self, username, password):
