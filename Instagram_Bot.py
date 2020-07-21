@@ -1,7 +1,11 @@
+import sys
 from time import sleep
 
 from selenium import webdriver
+import selenium.common.exceptions
 from selenium.webdriver.common.keys import Keys
+
+import Instagram_Bot_Application
 
 
 class InstaBot:
@@ -13,8 +17,13 @@ class InstaBot:
         self.driver.find_element_by_xpath(
             "//input[@name='username']").send_keys(username, Keys.TAB, password, Keys.ENTER)
         sleep(2)
-        self.driver.find_element_by_xpath(
-            "//button[contains(text(), 'Not Now')]").click()
+        self.wrongInfo = False
+        try:
+            self.driver.find_element_by_xpath(
+                "//button[contains(text(), 'Not Now')]").click()
+        except:
+            self.driver.quit()
+            raise selenium.common.exceptions.NoSuchElementException
         sleep(1)
         self.driver.find_element_by_xpath(
             "//button[contains(text(), 'Not Now')]").click()

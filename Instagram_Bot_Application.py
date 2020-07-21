@@ -8,7 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import _thread
+import threading
 from Instagram_Bot import *
 
 
@@ -226,7 +226,7 @@ class Ui_MainWindow(object):
             "MainWindow", "Get Not Following Back"))
 
         self.getNotFollowingBack.clicked.connect(
-            self.getNotFollowingBackThread)
+            self.getNotFollowingBackClicked)
         self.exportToFile.clicked.connect(self.saveFile)
 
     def saveFile(self):
@@ -238,43 +238,56 @@ class Ui_MainWindow(object):
                 text = self.outputField.toPlainText()
                 file.write(text)
 
-    def showPopup(self):
-        msg = QtWidgets.QMessageBox()
-        msg.setWindowTitle("Error!")
-        msg.setText("""
-        An error occurred! This can happen for many multiple reasons:
-           1. You closed the browser window before the bot completed its task
-           2. You entered the wrong username or password
-        Please try again.
-        """)
-        msg.setIcon(QtWidgets.QMessageBox.Critical)
+    def popup(self):
+        self.msg = QtWidgets.QMessageBox()
+        self.msg.setWindowTitle("Error!")
+        self.msg.setText(
+            "An error occurred! This is likely because you entered the wrong username or password. Please try again.")
+        self.msg.setIcon(QtWidgets.QMessageBox.Critical)
 
-        x = msg.exec_()
+        popupThread = threading.Thread(target=self.showPopup)
+        popupThread.start()
+
+    def showPopup(self):
+        x = self.msg.exec_()
 
     def startBot(self):
         self.bot = InstaBot(self.usernameField.text(),
                             self.passwordField.text())
 
-    def getNotFollowingBackThread(self):
-        _thread.start_new_thread(self.getNotFollowingBackClicked, ())
-
     def getNotFollowingBackClicked(self):
+        self.outputField.clear()
+        thread = threading.Thread(target=self.getNotFollowingBackFunc)
+        thread.start()
+
+    def getNotFollowingBackFunc(self):
+        self.getNotFollowingBack.setEnabled(False)
+
         try:
-            self.startBot()
+            try:
+                self.startBot()
+            except selenium.common.exceptions.NoSuchElementException:
+                self.getNotFollowingBack.setEnabled(True)
+                print(
+                    "You entered the wrong username or password, please try again.")
+                self.popup()
+
             self.bot.get_not_following_back()
 
             # Put all the not_following_back into the output field
             for name in self.bot.not_following_back:
                 self.outputField.append(name)
         except:
-            self.showPopup()
+            self.getNotFollowingBack.setEnabled(True)
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+
     sys.exit(app.exec_())
