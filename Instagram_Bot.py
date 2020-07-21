@@ -1,9 +1,10 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from time import sleep
 
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
-class Instabot:
+
+class InstaBot:
     def __init__(self, username, password):
         self.driver = webdriver.Chrome()
         self.driver.maximize_window()
@@ -59,10 +60,10 @@ class Instabot:
             "/html/body/div[4]/div/div/div[1]/div/div[2]/button").click()
 
         #################
-        not_following_back = [
+        self.not_following_back = [
             name for name in following if name not in followers]
 
         # Write all the people not following you back in a file
-        with open("Not_Following_Back", "w") as file:
-            for name in not_following_back:
-                file.write(name + "\n")
+        # with open("Not_Following_Back", "w") as file:
+        #     for name in self.not_following_back:
+        #         file.write(name + "\n")
